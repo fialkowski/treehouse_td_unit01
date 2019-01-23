@@ -95,6 +95,13 @@ let players: [String : [String : String]] = [
     ]
 ]
 
+//Iterating through the whole dictionary and printing the stored information
 for (player, information) in players {
-    print("\(player), is \(information["height"] ?? "God knows how tall")")
+    let experience: String
+    switch information["experience"] {
+    case "yes": experience = "Kicks some ass in soccer!"
+    case "no": experience = "Didn't play the game before."
+    default: experience = "No exact information on his previous experience."
+    }
+    print("\n\(player), is \(information["height"] ?? "Who knows how tall.")\" tall\n \(experience) \n Guardian - \(information["Guardian Name"] ?? "You go figure!").")
 }
