@@ -1,5 +1,29 @@
 import UIKit
 
+// Function to determine the given team average height. Will be used in the process of the team member assignment by average height.
+// Total height of all players is divided by the number of players in the team.
+func teamAverageHeight (of players: [String : [String : String]]) -> Double {
+    var totalTeamHeight: Double = 0
+    var numberOfPlayers: Double = 0
+    for (_, information) in players {
+        totalTeamHeight += Double(information["height"] ?? "0.0") ?? 0.0
+        numberOfPlayers += 1
+    }
+    return totalTeamHeight / numberOfPlayers
+}
+
+// Have to think about this logic...
+func assignPlayersToTeams(team1 firstTeam: [String : [String : String]],
+                          team2 secondTeam: [String : [String : String]],
+                          team3 thirdTeam: [String : [String : String]],
+                          players: [String : [String : String]]) {
+    for (player, information) in players {
+        if teamAverageHeight(of: firstTeam) >= teamAverageHeight(of: secondTeam) &&
+           teamAverageHeight(of: secondTeam) >= teamAverageHeight(of:thirdTeam){
+            thirdTeam.updateValue(player, forKey: <#T##String#>)
+        }
+    }
+
 //creating a player dictionary
 
 let players: [String : [String : String]] = [
@@ -105,3 +129,11 @@ for (player, information) in players {
     }
     print("\n\(player), is \(information["height"] ?? "Who knows how tall.")\" tall\n \(experience) \n Guardian - \(information["Guardian Name"] ?? "You go figure!").")
 }
+
+print(teamAverageHeight(team: players))
+
+/*
+
+}*/
+
+
