@@ -1,32 +1,68 @@
 import UIKit
 
-// Function to determine the given team average height. Will be used in the process of the team member assignment by average height.
+// Function to determine a passed team average height. Will be used in the process of the team member assignment by average height.
 // Total height of all players is divided by the number of players in the team.
-func teamAverageHeight (of players: [String : [String : String]]) -> Double {
-    var totalTeamHeight: Double = 0
-    var numberOfPlayers: Double = 0
-    for (_, information) in players {
-        totalTeamHeight += Double(information["height"] ?? "0.0") ?? 0.0
-        numberOfPlayers += 1
+func teamTotalHeight(of players: [String : [String : String]]) -> Double {
+    if (players.isEmpty) {
+        return 0.0
+    } else {
+        var totalTeamHeight: Double = 0
+        for (_, information) in players {
+            totalTeamHeight += Double(information["height"] ?? "0.0") ?? 0.0
+        }
+        return totalTeamHeight
     }
-    return totalTeamHeight / numberOfPlayers
 }
-
-// Have to think about this logic...
-func assignPlayersToTeams(team1 firstTeam: [String : [String : String]],
-                          team2 secondTeam: [String : [String : String]],
-                          team3 thirdTeam: [String : [String : String]],
-                          players: [String : [String : String]]) {
-    for (player, information) in players {
-        if teamAverageHeight(of: firstTeam) >= teamAverageHeight(of: secondTeam) &&
-           teamAverageHeight(of: secondTeam) >= teamAverageHeight(of:thirdTeam){
-            thirdTeam.updateValue(player, forKey: <#T##String#>)
+// This Function Returns a number of experienced player in a passed team
+func numberOfExperiencedPlayers(in team: [String : [String : String]]) -> Double {
+    var numberOfExperiencedPlayers: Double = 0
+    for (_, information) in team {
+        if (information["experience"] == "yes"){
+        numberOfExperiencedPlayers += 1
         }
     }
+    return numberOfExperiencedPlayers
+}
 
-//creating a player dictionary
+// This function prints a list of all players assigned to a passed team
+func printMembers(of team: [String : [String : String]]) {
+    for (player, information) in team {
+        let experience: String
+        switch information["experience"] {
+        case "yes": experience = "Kicks some ass in soccer!"
+        case "no": experience = "Didn't play the game before."
+        default: experience = "No exact information on his previous experience."
+        }
+        print("\n\(player), is \(information["height"] ?? "Who knows how tall.")\" tall\n \(experience) \n Guardian - \(information["Guardian Name"] ?? "You go figure!").")
+    }
+}
 
-let players: [String : [String : String]] = [
+func tallestPlayer(in players: [String : [String : String]]) -> (key: String, information: [String : String]) {
+    var tallestPlayerHeight: Double = 0
+    var tallestPlayerKey = String()
+    var tallestPlayerInformation = [String : String]()
+    for (player, information) in players {
+        if tallestPlayerHeight < Double(information["height"]!) ?? 0.0 {
+            tallestPlayerHeight = Double(information["height"]!) ?? 0.0
+            tallestPlayerKey = player
+            tallestPlayerInformation = information
+        }
+    }
+    return (tallestPlayerKey, tallestPlayerInformation)
+}
+
+//This function assigns player to a team relying on a least total team height
+
+//Declaring empty 2 dimension dictionaries for each soccer team
+var teamSharks = [String : [String : String]]()
+var teamDragons = [String : [String : String]]()
+var teamRaptors = [String : [String : String]]()
+
+//Declaring an empty Array to store letters
+var letters = [String]()
+
+//Declaring the Players list as a 2 dimension dictionary
+var players: [String : [String : String]] = [
     "Joe Smith":[
         "height" : "42.0",
         "experience" : "yes",
@@ -119,21 +155,4 @@ let players: [String : [String : String]] = [
     ]
 ]
 
-//Iterating through the whole dictionary and printing the stored information
-for (player, information) in players {
-    let experience: String
-    switch information["experience"] {
-    case "yes": experience = "Kicks some ass in soccer!"
-    case "no": experience = "Didn't play the game before."
-    default: experience = "No exact information on his previous experience."
-    }
-    print("\n\(player), is \(information["height"] ?? "Who knows how tall.")\" tall\n \(experience) \n Guardian - \(information["Guardian Name"] ?? "You go figure!").")
-}
-
-print(teamAverageHeight(team: players))
-
-/*
-
-}*/
-
-
+print(tallestPlayer(in: players).key)
