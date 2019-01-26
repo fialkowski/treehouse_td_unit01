@@ -1,18 +1,14 @@
 import UIKit
 
-// Function to determine a passed team average height. Will be used in the process of the team member assignment by average height.
-// Total height of all players is divided by the number of players in the team.
-func teamTotalHeight(of players: [String : [String : String]]) -> Double {
-    if (players.isEmpty) {
-        return 0.0
-    } else {
-        var totalTeamHeight: Double = 0
-        for (_, information) in players {
-            totalTeamHeight += Double(information["height"] ?? "0.0") ?? 0.0
-        }
-        return totalTeamHeight
+// Function to determine a passed team total height. Will be used in the process of the team member assignment by average height.
+func totalHeight(of players: [String : [String : String]]) -> Double {
+    var totalTeamHeight: Double = 0
+    for (_, information) in players {
+        totalTeamHeight += Double(information["height"] ?? "0.0") ?? 0.0
     }
+    return totalTeamHeight
 }
+
 // This Function Returns a number of experienced player in a passed team
 func numberOfExperiencedPlayers(in team: [String : [String : String]]) -> Double {
     var numberOfExperiencedPlayers: Double = 0
@@ -24,34 +20,66 @@ func numberOfExperiencedPlayers(in team: [String : [String : String]]) -> Double
     return numberOfExperiencedPlayers
 }
 
-// This function prints a list of all players assigned to a passed team
-func printMembers(of team: [String : [String : String]]) {
-    for (player, information) in team {
-        let experience: String
-        switch information["experience"] {
-        case "yes": experience = "Kicks some ass in soccer!"
-        case "no": experience = "Didn't play the game before."
-        default: experience = "No exact information on his previous experience."
-        }
-        print("\n\(player), is \(information["height"] ?? "Who knows how tall.")\" tall\n \(experience) \n Guardian - \(information["Guardian Name"] ?? "You go figure!").")
+//this functiond returns a key and an information for a tallest player in the passed dictionary
+func tallestPlayer(withExperience : Bool, in players: [String : [String : String]]) -> (key: String, information: [String : String]) {
+    var tallestPlayerHeight: Double = 0 //Will be user as a comparator on line 37 (mutates if the condition on line 37 is satisfied)
+    var tallestPlayerKey = String() //A buffer to store a a tallest player key
+    var tallestPlayerInformation = [String : String]() //A buffer to store a tallest player information
+    var searchParameter = String() //A service variable to mutate a search condition on line 37
+    switch withExperience { //switching a parameter for experienced players search
+    case true: searchParameter = "yes"
+    default: searchParameter = "no"
     }
-}
-
-func tallestPlayer(in players: [String : [String : String]]) -> (key: String, information: [String : String]) {
-    var tallestPlayerHeight: Double = 0
-    var tallestPlayerKey = String()
-    var tallestPlayerInformation = [String : String]()
-    for (player, information) in players {
-        if tallestPlayerHeight < Double(information["height"]!) ?? 0.0 {
-            tallestPlayerHeight = Double(information["height"]!) ?? 0.0
-            tallestPlayerKey = player
-            tallestPlayerInformation = information
+    for (player, information) in players { //iterating through the passed dictionary
+        if (tallestPlayerHeight < Double(information["height"]!) ?? 0.0) &&
+           (information["experience"] == searchParameter){
+                tallestPlayerHeight = Double(information["height"]!) ?? 0.0
+                tallestPlayerKey = player
+                tallestPlayerInformation = information
         }
     }
     return (tallestPlayerKey, tallestPlayerInformation)
 }
 
-//This function assigns player to a team relying on a least total team height
+func makeLetters(for team: [String : [String : String]], withPrintName printName: String) -> [String] {
+    var letters:[String] = []
+    for player in team {
+        let string = "\n" +
+                     "-------------------------------------------------------------------\n" +
+                     "               \(printName) Football Club\n" +
+                     "-------------------------------------------------------------------\n" +
+                     "\n" +
+                     "Dear \(player.value["Guardian Name"] ?? "Parent / Guardian")!\n" +
+                     "\n" +
+                     "On behalf of \(printName) FC, I'm happy to inform you that\n" +
+                     " \(player.key) is now a member of \(printName) Football Club.\n" +
+                     "\n" +
+                     "--\n" +
+                     "\n" +
+                     "Best Regards,\n" +
+                     "Tara N. Tino\n" +
+                     "Team Manager\n" +
+                     "-------------------------------------------------------------------\n"
+        letters.append(string)
+    }
+    return letters
+}
+
+//This function prints letters for a passed dictionary
+func print(_ letters: [String]) {
+    for letter in letters {
+        print(letter)
+    }
+}
+
+// Function to print team average height. Will be used in the process of the team member assignment by average height.
+func printAverageHeight(for team: [String : [String : String]], withPrintName printName: String){
+    var totalTeamHeight: Double = 0
+    for (_, information) in team {
+        totalTeamHeight += Double(information["height"] ?? "0.0") ?? 0.0
+    }
+    print("\(printName) Football Team Average height is \(String(format: "%.2f", totalTeamHeight / Double(team.count)))") //formatting a double as string to round an output to 0.00
+}
 
 //Declaring empty 2 dimension dictionaries for each soccer team
 var teamSharks = [String : [String : String]]()
@@ -155,4 +183,48 @@ var players: [String : [String : String]] = [
     ]
 ]
 
-print(tallestPlayer(in: players).key)
+// Assigning experienced players
+for _ in 0..<Int(numberOfExperiencedPlayers(in: players)) { //here for a better perfomance the code iterates for for the number of experienced players not through the whole thing
+    let tallestPlayerKey = tallestPlayer(withExperience: true, in: players).key
+    let tallestPlayerInformation = tallestPlayer(withExperience: true, in: players).information
+    if tallestPlayerKey != "" { //Protection against writing an empty value into the dictionary
+        if (totalHeight(of: teamSharks) >= totalHeight(of: teamRaptors)) && // checking if Raptors is the shortest team
+           (totalHeight(of: teamDragons) >= totalHeight(of: teamRaptors)) {
+            teamRaptors.updateValue(tallestPlayerInformation, forKey: tallestPlayerKey)
+        } else if (totalHeight(of: teamSharks) >= totalHeight(of: teamDragons)) && //checking if Dragons is the shortest team
+            (totalHeight(of: teamRaptors) >= totalHeight(of: teamDragons)) {
+            teamDragons.updateValue(tallestPlayerInformation, forKey: tallestPlayerKey)
+        } else if (totalHeight(of: teamDragons) >= totalHeight(of: teamSharks)) && //checking if Sharks is the shortest team
+            (totalHeight(of: teamRaptors) >= totalHeight(of: teamSharks)) {
+            teamSharks.updateValue(tallestPlayerInformation, forKey: tallestPlayerKey)
+        }
+    }
+    players.removeValue(forKey: tallestPlayerKey)
+}
+
+// Assigning inexperienced players
+for _ in 0..<players.count { //iterating through the remaining players
+    let tallestPlayerKey = tallestPlayer(withExperience: false, in: players).key
+    let tallestPlayerInformation = tallestPlayer(withExperience: false, in: players).information
+    if tallestPlayerKey != "" { //Protection against writing an empty value into the dictionary
+        if (totalHeight(of: teamSharks) >= totalHeight(of: teamRaptors)) &&
+            (totalHeight(of: teamDragons) >= totalHeight(of: teamRaptors)) {
+            teamRaptors.updateValue(tallestPlayerInformation, forKey: tallestPlayerKey)
+        } else if (totalHeight(of: teamSharks) >= totalHeight(of: teamDragons)) &&
+            (totalHeight(of: teamRaptors) >= totalHeight(of: teamDragons)) {
+            teamDragons.updateValue(tallestPlayerInformation, forKey: tallestPlayerKey)
+        } else if (totalHeight(of: teamDragons) >= totalHeight(of: teamSharks)) &&
+            (totalHeight(of: teamRaptors) >= totalHeight(of: teamSharks)) {
+            teamSharks.updateValue(tallestPlayerInformation, forKey: tallestPlayerKey)
+        }
+    }
+    players.removeValue(forKey: tallestPlayerKey)
+}
+
+letters += makeLetters(for: teamRaptors, withPrintName: "Raptors")
+letters += makeLetters(for: teamDragons, withPrintName: "Dragons")
+letters += makeLetters(for: teamSharks, withPrintName: "Sharks")
+print(letters)
+printAverageHeight(for: teamRaptors, withPrintName: "Raptors")
+printAverageHeight(for: teamDragons, withPrintName: "Dragons")
+printAverageHeight(for: teamSharks, withPrintName: "Sharks")
